@@ -1,0 +1,16 @@
+{
+  "short_name": "Plan Repas",
+  "name": "Planificateur de Repas IA",
+  "description": "Planifiez vos repas et générez votre liste de courses, même hors ligne.",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#4f46e5",
+  "background_color": "#f8fafc"
+}
