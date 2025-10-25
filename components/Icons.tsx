@@ -41,3 +41,34 @@ export const ShareIcon = ({ className = 'w-6 h-6' }: { className?: string }) => 
         <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.186 2.25 2.25 0 0 0-3.933 2.186Z" />
     </svg>
 );
+
+export const CogIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-1.003 1.11-1.226l.043-.018a2.25 2.25 0 0 1 2.286.96c.078.172.126.354.126.542a2.25 2.25 0 0 1-2.286 2.286c-.188 0-.37-.048-.542-.126a2.25 2.25 0 0 1-1.226-1.11l-.018-.043zm-2.101 4.225a2.25 2.25 0 0 1 2.286-.96c.188 0 .37.048.542.126a2.25 2.25 0 0 1 1.226 1.11l.018.043c.09.542.56 1.003 1.11 1.226l.043.018a2.25 2.25 0 0 1 .96 2.286c-.078.172-.126.354-.126.542a2.25 2.25 0 0 1-2.286 2.286c-.188 0-.37-.048-.542-.126a2.25 2.25 0 0 1-1.226-1.11l-.018-.043c-.09-.542-.56-1.003-1.11-1.226l-.043-.018a2.25 2.25 0 0 1-.96-2.286c.078-.172.126-.354.126-.542a2.25 2.25 0 0 1 2.286-2.286c.188 0 .37.048.542.126a2.25 2.25 0 0 1 1.226 1.11l.018.043zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 12a9.75 9.75 0 1 1-19.5 0 9.75 9.75 0 0 1 19.5 0z" />
+    </svg>
+);
+
+export const BookOpenIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+    </svg>
+);
+
+export const ClipboardListIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 6.45 3.75H18a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 18 21.75H6.45A2.25 2.25 0 0 1 4.2 19.5V6.108c0-1.135.845-2.098 1.976-2.192a48.424 48.424 0 0 0 1.123-.08" />
+    </svg>
+);
+
+export const ShoppingCartIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c.51 0 .962-.328 1.093-.828l2.91-6.836a.75.75 0 0 0-.545-1.093H5.715a.75.75 0 0 0-.722.546L3 12.75M15 21a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 0h-5.019m-4.047 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
+    </svg>
+);
+
+export const KnifeForkIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 6.083c-.09.417-.188.82-.284 1.217A4.5 4.5 0 0 1 10.5 12H9.75a.75.75 0 0 0 0 1.5h.75a4.5 4.5 0 0 1 3.466 4.7a14.349 14.349 0 0 1-.284 1.217M9.75 21a.75.75 0 0 0 .75-.75V3.75a.75.75 0 0 0-1.5 0v16.5a.75.75 0 0 0 .75.75Z" />
+    </svg>
+);

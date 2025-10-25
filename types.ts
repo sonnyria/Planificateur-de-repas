@@ -19,3 +19,5 @@ export interface AggregatedIngredient {
   unit: string;
   fromMeals: string[];
 }
+
+export type SelectedMealsConfig = { [mealId: number]: number };

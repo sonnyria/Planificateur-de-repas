@@ -3,21 +3,24 @@ import MealForm from './components/MealForm';
 import MealList from './components/MealList';
 import ShoppingList from './components/ShoppingList';
 import SelectedMeals from './components/SelectedMeals';
+import DataManagementModal from './components/DataManagementModal';
+import BottomNavBar from './components/BottomNavBar';
+import { CogIcon, KnifeForkIcon } from './components/Icons';
 import type { Meal, AggregatedIngredient } from './types';
 
 // This type is expected by MealList and SelectedMeals
 export type SelectedMealsConfig = { [mealId: number]: number };
 
 type TabId = 'selected' | 'recipes' | 'shopping';
-type Tab = {
+export type Tab = {
   id: TabId;
   label: string;
 };
 
 const initialTabs: Tab[] = [
-  { id: 'selected', label: 'Repas Sélectionnés' },
-  { id: 'recipes', label: 'Mes Recettes' },
-  { id: 'shopping', label: 'Liste de Courses' },
+  { id: 'selected', label: 'Sélection' },
+  { id: 'recipes', label: 'Recettes' },
+  { id: 'shopping', label: 'Courses' },
 ];
 
 const App: React.FC = () => {
@@ -67,7 +70,21 @@ const App: React.FC = () => {
       if (savedTabsOrder) {
         const orderedIds = JSON.parse(savedTabsOrder) as TabId[];
         // Re-order initialTabs based on saved IDs to preserve labels and handle potential new tabs
-        return initialTabs.sort((a, b) => orderedIds.indexOf(a.id) - orderedIds.indexOf(b.id));
+        const orderedTabs = [...initialTabs].sort((a, b) => {
+            const indexA = orderedIds.indexOf(a.id);
+            const indexB = orderedIds.indexOf(b.id);
+            if (indexA === -1 && indexB === -1) return 0; // Both new, keep original order
+            if (indexA === -1) return 1; // a is new, put at the end
+            if (indexB === -1) return -1; // b is new, put at the end
+            return indexA - indexB;
+        });
+        // Add any tabs that might be new in the code but not in storage
+        initialTabs.forEach(initialTab => {
+            if (!orderedTabs.find(t => t.id === initialTab.id)) {
+                orderedTabs.push(initialTab);
+            }
+        });
+        return orderedTabs;
       }
       return initialTabs;
     } catch (error) {
@@ -76,6 +93,7 @@ const App: React.FC = () => {
     }
   });
 
+  const [isDataModalOpen, setIsDataModalOpen] = useState(false);
   const hasSelectedMeals = Object.keys(selectedMealsConfig).length > 0;
   const [activeTab, setActiveTab] = useState<TabId>(hasSelectedMeals ? tabs[0].id : 'recipes');
 
@@ -253,37 +271,68 @@ const App: React.FC = () => {
     });
   }, []);
   
+  const handleImportData = (data: any) => {
+    setMeals(data.meals || []);
+    setSelectedMealsConfig(data.selectedMealsConfig || {});
+    setManualShoppingItems(data.manualShoppingItems || []);
+    setSuppressedItemKeys(data.suppressedItemKeys || []);
+    if(data.tabsOrder){
+        const orderedIds = data.tabsOrder as TabId[];
+        const orderedTabs = [...initialTabs].sort((a, b) => orderedIds.indexOf(a.id) - orderedIds.indexOf(b.id));
+        setTabs(orderedTabs);
+    } else {
+        setTabs(initialTabs);
+    }
+    setIsDataModalOpen(false); // Close modal on success
+  };
+  
   const selectedMealsCount = Object.keys(selectedMealsConfig).length;
 
   return (
-    <div className="bg-slate-100 min-h-screen font-sans text-slate-800">
-      <header className="bg-white shadow-sm">
-          <div className="max-w-4xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-              <h1 className="text-3xl font-bold leading-tight text-slate-900">
-                  Planificateur de Repas
-              </h1>
+    <div className="bg-stone-100 min-h-screen font-sans text-slate-800">
+      <header className="bg-white shadow-sm sticky top-0 z-10">
+          <div className="max-w-4xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-between items-center">
+                <div className="w-8"></div> {/* Spacer */}
+                <div className="flex-grow text-center">
+                    <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-slate-800 inline-flex items-center gap-2">
+                        <KnifeForkIcon className="w-6 h-6 text-slate-400 hidden sm:inline" />
+                        <span className="font-sans font-bold">Planificateur de</span>
+                        <span className="font-script text-indigo-600 text-3xl sm:text-4xl -rotate-6">repas</span>
+                    </h1>
+                </div>
+                <button
+                  onClick={() => setIsDataModalOpen(true)}
+                  className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-full transition-colors"
+                  aria-label="Ouvrir les paramètres de données"
+                >
+                  <CogIcon className="w-6 h-6" />
+                </button>
+              </div>
+          </div>
+          <div className="sm:hidden">
+            <BottomNavBar 
+                tabs={tabs}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                hasSelectedMeals={hasSelectedMeals}
+                selectedMealsCount={selectedMealsCount}
+            />
           </div>
       </header>
-      <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="sm:hidden">
-            <label htmlFor="tabs" className="sr-only">Select a tab</label>
-            <select 
-              id="tabs" 
-              name="tabs" 
-              onChange={(e) => setActiveTab(e.target.value as TabId)} 
-              value={activeTab} 
-              className="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 bg-white text-slate-900"
-            >
-              {tabs.map(tab => {
-                const isDisabled = (tab.id === 'selected' || tab.id === 'shopping') && !hasSelectedMeals;
-                return (
-                  <option key={tab.id} value={tab.id} disabled={isDisabled}>
-                    {tab.label} {tab.id === 'selected' && hasSelectedMeals ? `(${selectedMealsCount})` : ''}
-                  </option>
-                );
-              })}
-            </select>
-        </div>
+      
+      <DataManagementModal 
+        isOpen={isDataModalOpen}
+        onClose={() => setIsDataModalOpen(false)}
+        meals={meals}
+        selectedMealsConfig={selectedMealsConfig}
+        manualShoppingItems={manualShoppingItems}
+        suppressedItemKeys={suppressedItemKeys}
+        tabs={tabs}
+        onImport={handleImportData}
+      />
+
+      <main className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="hidden sm:block">
             <div className="border-b border-gray-200">
                 <nav className="-mb-px flex space-x-8" aria-label="Tabs">
@@ -291,6 +340,12 @@ const App: React.FC = () => {
                       const isActive = activeTab === tab.id;
                       const isDisabled = (tab.id === 'selected' || tab.id === 'shopping') && !hasSelectedMeals;
                       
+                      const desktopLabels: Record<TabId, string> = {
+                        selected: 'Repas Sélectionnés',
+                        recipes: 'Mes Recettes',
+                        shopping: 'Liste de Courses',
+                      };
+
                       return (
                         <button
                           key={tab.id}
@@ -301,13 +356,13 @@ const App: React.FC = () => {
                           onDragOver={handleDragOver}
                           onDrop={(e) => handleDrop(e, tab.id)}
                           className={`
-                            ${isActive ? 'bg-indigo-600 text-white' : 'border-transparent text-gray-500 hover:text-gray-700'} 
-                            whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm rounded-t-lg transition-colors duration-200
-                            disabled:text-gray-400 disabled:hover:border-transparent disabled:cursor-not-allowed disabled:bg-transparent
+                            ${isActive ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} 
+                            whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                            disabled:text-gray-300 disabled:hover:border-transparent disabled:cursor-not-allowed
                           `}
                         >
-                          {tab.label}
-                          {tab.id === 'selected' && hasSelectedMeals ? <span className={`${isActive ? 'bg-indigo-400 text-white' : 'bg-indigo-100 text-indigo-600'} ml-3 py-0.5 px-2.5 rounded-full text-xs font-medium`}>{selectedMealsCount}</span> : null}
+                          {desktopLabels[tab.id]}
+                          {tab.id === 'selected' && hasSelectedMeals ? <span className={`${isActive ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-600'} ml-3 py-0.5 px-2.5 rounded-full text-xs font-medium`}>{selectedMealsCount}</span> : null}
                         </button>
                       );
                     })}

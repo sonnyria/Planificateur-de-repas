@@ -1,5 +1,5 @@
 {
-  "name": "Planificateur de Repas IA",
+  "name": "Planificateur de Repas",
   "description": "Une application pour enregistrer des idées de repas, associer les ingrédients nécessaires et générer automatiquement une liste de courses.",
   "requestFramePermissions": []
 }
