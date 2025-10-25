@@ -1,5 +1,5 @@
 {
   "name": "Planificateur de Repas IA",
-  "description": "Une application pour enregistrer des idées de repas, associer les ingrédients nécessaires et générer automatiquement une liste de courses. L'IA peut suggérer des ingrédients pour de nouvelles recettes.",
+  "description": "Une application pour enregistrer des idées de repas, associer les ingrédients nécessaires et générer automatiquement une liste de courses.",
   "requestFramePermissions": []
 }

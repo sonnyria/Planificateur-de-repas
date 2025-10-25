@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import type { Meal, Ingredient, Unit } from '../types';
-import { suggestIngredients } from '../services/geminiService';
-import { PlusIcon, SparklesIcon, TrashIcon } from './Icons';
+import { PlusIcon, TrashIcon } from './Icons';
 
 interface MealFormProps {
   onAddMeal: (meal: Omit<Meal, 'id'>) => void;
@@ -11,24 +10,6 @@ const MealForm: React.FC<MealFormProps> = ({ onAddMeal }) => {
   const [mealName, setMealName] = useState('');
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [currentIngredient, setCurrentIngredient] = useState({ name: '', quantity: '', unit: 'g' as Unit });
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSuggestIngredients = async () => {
-    if (!mealName) return;
-    setIsLoading(true);
-    const suggested = await suggestIngredients(mealName);
-    
-    // Divide quantities by 4 to get a per-person baseline
-    const perPersonSuggestions = suggested.map(ing => ({
-        ...ing,
-        quantity: ing.quantity / 4
-    }));
-
-    // Filter out suggestions that are already in the list
-    const newSuggestions = perPersonSuggestions.filter(sugg => !ingredients.some(ing => ing.name.toLowerCase() === sugg.name.toLowerCase()));
-    setIngredients([...ingredients, ...newSuggestions]);
-    setIsLoading(false);
-  };
 
   const handleAddIngredient = () => {
     if (currentIngredient.name && currentIngredient.quantity && currentIngredient.unit) {
@@ -73,38 +54,15 @@ const MealForm: React.FC<MealFormProps> = ({ onAddMeal }) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="mealName" className="block text-sm font-medium text-slate-600 mb-1">Nom du plat</label>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <input
-              id="mealName"
-              type="text"
-              value={mealName}
-              onChange={(e) => setMealName(e.target.value)}
-              placeholder="Ex: Spaghetti Bolognaise"
-              className="flex-grow w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-white text-slate-900"
-              required
-            />
-            <button
-              type="button"
-              onClick={handleSuggestIngredients}
-              disabled={!mealName || isLoading}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-500 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-600 disabled:bg-indigo-300 disabled:cursor-not-allowed transition-colors"
-            >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Suggestion...
-                </>
-              ) : (
-                <>
-                  <SparklesIcon className="w-5 h-5" />
-                  Suggérer des ingrédients
-                </>
-              )}
-            </button>
-          </div>
+          <input
+            id="mealName"
+            type="text"
+            value={mealName}
+            onChange={(e) => setMealName(e.target.value)}
+            placeholder="Ex: Spaghetti Bolognaise"
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-white text-slate-900"
+            required
+          />
         </div>
         
         <div>

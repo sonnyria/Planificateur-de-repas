@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { Meal } from '../types';
-import { TrashIcon } from './Icons';
+import { TrashIcon, ClipboardIcon, CheckIcon, ShareIcon } from './Icons';
 import type { SelectedMealsConfig } from '../App';
 
 interface SelectedMealsProps {
@@ -11,7 +11,35 @@ interface SelectedMealsProps {
 }
 
 const SelectedMeals: React.FC<SelectedMealsProps> = ({ meals, selectedMealsConfig, onUpdateServings, onDeselectMeal }) => {
+  const [copied, setCopied] = useState(false);
+  const isShareSupported = typeof navigator.share === 'function';
   const selectedMeals = meals.filter(meal => selectedMealsConfig[meal.id]);
+
+  const getListAsText = () => {
+    return selectedMeals.map(meal => `- ${meal.name} (${selectedMealsConfig[meal.id]} pers.)`).join('\n');
+  }
+
+  const handleCopyToClipboard = () => {
+    const listText = getListAsText();
+    navigator.clipboard.writeText(listText).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleShare = async () => {
+    const listText = getListAsText();
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'Mes repas sélectionnés',
+                text: listText,
+            });
+        } catch (error) {
+            console.error('Erreur lors du partage:', error);
+        }
+    }
+  };
 
   if (selectedMeals.length === 0) {
     return (
@@ -25,7 +53,29 @@ const SelectedMeals: React.FC<SelectedMealsProps> = ({ meals, selectedMealsConfi
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-lg">
-      <h2 className="text-2xl font-bold text-slate-800 mb-4">Repas Sélectionnés</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold text-slate-800">Repas Sélectionnés</h2>
+        {selectedMeals.length > 0 && (
+            <div className="flex items-center gap-2">
+                <button 
+                    onClick={handleCopyToClipboard}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+                >
+                    {copied ? <CheckIcon className="w-4 h-4 text-green-600" /> : <ClipboardIcon className="w-4 h-4" />}
+                    {copied ? 'Copié !' : 'Copier'}
+                </button>
+                 {isShareSupported && (
+                    <button 
+                        onClick={handleShare}
+                        className="flex items-center gap-2 px-3 py-1.5 text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+                    >
+                        <ShareIcon className="w-4 h-4" />
+                        Partager
+                    </button>
+                )}
+            </div>
+        )}
+      </div>
       <ul className="space-y-3">
         {selectedMeals.map((meal) => (
           <li key={meal.id} className="bg-slate-50 rounded-lg shadow-sm p-3 flex items-center justify-between">

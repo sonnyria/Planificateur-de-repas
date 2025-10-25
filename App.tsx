@@ -51,6 +51,16 @@ const App: React.FC = () => {
     }
   });
 
+  const [suppressedItemKeys, setSuppressedItemKeys] = useState<string[]>(() => {
+    try {
+        const savedKeys = localStorage.getItem('suppressedItemKeys');
+        return savedKeys ? JSON.parse(savedKeys) : [];
+    } catch (error) {
+        console.error("Could not parse suppressedItemKeys from localStorage", error);
+        return [];
+    }
+  });
+
   const [tabs, setTabs] = useState<Tab[]>(() => {
     try {
       const savedTabsOrder = localStorage.getItem('tabsOrder');
@@ -80,14 +90,22 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('manualShoppingItems', JSON.stringify(manualShoppingItems));
   }, [manualShoppingItems]);
+  
+  useEffect(() => {
+    localStorage.setItem('suppressedItemKeys', JSON.stringify(suppressedItemKeys));
+  }, [suppressedItemKeys]);
 
   useEffect(() => {
     localStorage.setItem('tabsOrder', JSON.stringify(tabs.map(t => t.id)));
   }, [tabs]);
 
   useEffect(() => {
-    if (!hasSelectedMeals && (activeTab === 'selected' || activeTab === 'shopping')) {
-      setActiveTab('recipes');
+    // If there are no more selected meals, reset the list of suppressed items
+    if (!hasSelectedMeals) {
+        setSuppressedItemKeys([]);
+        if (activeTab === 'selected' || activeTab === 'shopping') {
+            setActiveTab('recipes');
+        }
     }
   }, [hasSelectedMeals, activeTab]);
 
@@ -204,8 +222,14 @@ const App: React.FC = () => {
         }
     });
 
-    return Array.from(ingredientMap.values()).sort((a, b) => a.name.localeCompare(b.name));
-  }, [meals, selectedMealsConfig, manualShoppingItems]);
+    const allItems = Array.from(ingredientMap.values());
+    const finalItems = allItems.filter(item => {
+        const key = `${item.name.toLowerCase()}_${item.unit}`;
+        return !suppressedItemKeys.includes(key);
+    });
+
+    return finalItems.sort((a, b) => a.name.localeCompare(b.name));
+  }, [meals, selectedMealsConfig, manualShoppingItems, suppressedItemKeys]);
   
   const handleAddShoppingItem = useCallback((item: Omit<AggregatedIngredient, 'fromMeals'>) => {
       setManualShoppingItems(prev => {
@@ -220,10 +244,12 @@ const App: React.FC = () => {
   }, []);
 
   const handleDeleteShoppingItem = useCallback((itemKey: string) => {
+    // Add to suppressed list for aggregated ingredients from recipes
+    setSuppressedItemKeys(prev => [...new Set([...prev, itemKey])]);
+    
+    // Also remove from manual items list in case it was a manual item
     setManualShoppingItems(prev => {
-        const [name, unit] = itemKey.split('_');
-        const keyToDelete = `${name}_${unit}`;
-        return prev.filter(item => `${item.name.toLowerCase()}_${item.unit}` !== keyToDelete);
+        return prev.filter(item => `${item.name.toLowerCase()}_${item.unit}` !== itemKey);
     });
   }, []);
   

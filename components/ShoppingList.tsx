@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { AggregatedIngredient, Unit } from '../types';
-import { ClipboardIcon, CheckIcon, TrashIcon, PlusIcon } from './Icons';
+import { ClipboardIcon, CheckIcon, TrashIcon, PlusIcon, ShareIcon } from './Icons';
 
 interface ShoppingListProps {
   items: AggregatedIngredient[];
@@ -46,13 +46,32 @@ const AddItemForm: React.FC<{ onAddItem: ShoppingListProps['onAddItem'] }> = ({ 
 
 const ShoppingList: React.FC<ShoppingListProps> = ({ items, onAddItem, onDeleteItem, hasSelectedMeals }) => {
   const [copied, setCopied] = useState(false);
+  const isShareSupported = typeof navigator.share === 'function';
+
+  const getListAsText = () => {
+      return items.map(ing => `- ${ing.name}: ${ing.quantity.toFixed(2).replace(/\.00$/, '')} ${ing.unit}`).join('\n');
+  }
 
   const handleCopyToClipboard = () => {
-    const listText = items.map(ing => `- ${ing.name}: ${ing.quantity.toFixed(2).replace(/\.00$/, '')} ${ing.unit}`).join('\n');
+    const listText = getListAsText();
     navigator.clipboard.writeText(listText).then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const handleShare = async () => {
+    const listText = getListAsText();
+    if (navigator.share) {
+        try {
+            await navigator.share({
+                title: 'Ma liste de courses',
+                text: listText,
+            });
+        } catch (error) {
+            console.error('Erreur lors du partage:', error);
+        }
+    }
   };
 
   return (
@@ -60,13 +79,24 @@ const ShoppingList: React.FC<ShoppingListProps> = ({ items, onAddItem, onDeleteI
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-slate-800">Liste de Courses</h2>
         {items.length > 0 && (
-          <button 
-            onClick={handleCopyToClipboard}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
-          >
-            {copied ? <CheckIcon className="w-4 h-4 text-green-600" /> : <ClipboardIcon className="w-4 h-4" />}
-            {copied ? 'Copié !' : 'Copier'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleCopyToClipboard}
+              className="flex items-center gap-2 px-3 py-1.5 text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+            >
+              {copied ? <CheckIcon className="w-4 h-4 text-green-600" /> : <ClipboardIcon className="w-4 h-4" />}
+              {copied ? 'Copié !' : 'Copier'}
+            </button>
+            {isShareSupported && (
+                 <button 
+                    onClick={handleShare}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors"
+                 >
+                    <ShareIcon className="w-4 h-4" />
+                    Partager
+                </button>
+            )}
+          </div>
         )}
       </div>
       
