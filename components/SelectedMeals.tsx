@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import type { Meal } from '../types';
+import type { Meal, SelectedMealsConfig } from '../types';
 import { TrashIcon, ClipboardIcon, CheckIcon, ShareIcon } from './Icons';
-import type { SelectedMealsConfig } from '../App';
 
 interface SelectedMealsProps {
   meals: Meal[];

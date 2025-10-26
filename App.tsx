@@ -6,10 +6,7 @@ import SelectedMeals from './components/SelectedMeals';
 import DataManagementModal from './components/DataManagementModal';
 import BottomNavBar from './components/BottomNavBar';
 import { CogIcon, KnifeForkIcon } from './components/Icons';
-import type { Meal, AggregatedIngredient } from './types';
-
-// This type is expected by MealList and SelectedMeals
-export type SelectedMealsConfig = { [mealId: number]: number };
+import type { Meal, AggregatedIngredient, SelectedMealsConfig } from './types';
 
 type TabId = 'selected' | 'recipes' | 'shopping';
 export type Tab = {
@@ -94,8 +91,14 @@ const App: React.FC = () => {
   });
 
   const [isDataModalOpen, setIsDataModalOpen] = useState(false);
+  
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    const hasSelected = Object.keys(selectedMealsConfig).length > 0;
+    const firstTabId = tabs[0]?.id;
+    return hasSelected && firstTabId ? firstTabId : 'recipes';
+  });
+  
   const hasSelectedMeals = Object.keys(selectedMealsConfig).length > 0;
-  const [activeTab, setActiveTab] = useState<TabId>(hasSelectedMeals && tabs[0] ? tabs[0].id : 'recipes');
 
   useEffect(() => {
     localStorage.setItem('meals', JSON.stringify(meals));

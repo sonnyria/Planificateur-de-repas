@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import type { Meal } from '../types';
+import type { Meal, SelectedMealsConfig } from '../types';
 import { TrashIcon, PencilIcon } from './Icons';
 import EditMealModal from './EditMealModal';
-import type { SelectedMealsConfig } from '../App';
 
 interface MealListProps {
   meals: Meal[];
