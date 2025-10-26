@@ -95,7 +95,7 @@ const App: React.FC = () => {
 
   const [isDataModalOpen, setIsDataModalOpen] = useState(false);
   const hasSelectedMeals = Object.keys(selectedMealsConfig).length > 0;
-  const [activeTab, setActiveTab] = useState<TabId>(hasSelectedMeals ? tabs[0].id : 'recipes');
+  const [activeTab, setActiveTab] = useState<TabId>(hasSelectedMeals && tabs[0] ? tabs[0].id : 'recipes');
 
   useEffect(() => {
     localStorage.setItem('meals', JSON.stringify(meals));
