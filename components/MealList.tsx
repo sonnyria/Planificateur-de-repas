@@ -77,7 +77,7 @@ const MealList: React.FC<MealListProps> = ({ meals, selectedMealsConfig, onMealS
               </div>
               {isExpanded && (
                  <div className="px-4 pb-3 ml-8 border-t border-slate-200">
-                    <h4 className="mt-2 text-sm font-semibold text-slate-700">Ingrédients (pour 1 pers.) :</h4>
+                    <h4 className="mt-2 text-sm font-semibold text-slate-700">Ingrédients (pour {meal.baseServings} personne{meal.baseServings > 1 ? 's' : ''}) :</h4>
                     <ul className="mt-2 text-sm text-slate-600 list-disc list-inside space-y-1">
                       {meal.ingredients.map((ing, index) => (
                         <li key={index}>{ing.quantity} {ing.unit} {ing.name}</li>

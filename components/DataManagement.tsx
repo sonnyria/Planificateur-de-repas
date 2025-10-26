@@ -83,29 +83,32 @@ const DataManagement: React.FC<DataManagementProps> = ({
   };
 
   return (
-    <>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <button
-          onClick={handleExport}
-          className="flex-1 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition-colors"
-        >
-          Exporter mes données
-        </button>
-        <button
-          onClick={handleImportClick}
-          className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition-colors"
-        >
-          Importer des données
-        </button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept="application/json"
-          className="hidden"
-        />
-      </div>
-    </>
+    <div className="space-y-8">
+        <div>
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">Sauvegarde des données</h3>
+            <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                onClick={handleExport}
+                className="flex-1 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition-colors"
+                >
+                Exporter mes données
+                </button>
+                <button
+                onClick={handleImportClick}
+                className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition-colors"
+                >
+                Importer des données
+                </button>
+                <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="application/json"
+                className="hidden"
+                />
+            </div>
+        </div>
+    </div>
   );
 };
 

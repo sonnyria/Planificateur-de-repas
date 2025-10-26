@@ -50,7 +50,7 @@ const EditMealModal: React.FC<EditMealModalProps> = ({ meal, onUpdate, onClose }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (mealName && ingredients.length > 0) {
-      onUpdate({ ...meal, name: mealName, ingredients, baseServings: 1 }); // Ensure baseServings is 1
+      onUpdate({ ...meal, name: mealName, ingredients, baseServings: meal.baseServings });
     }
   };
 
@@ -93,7 +93,7 @@ const EditMealModal: React.FC<EditMealModalProps> = ({ meal, onUpdate, onClose }
 
           {ingredients.length > 0 && (
             <div className="space-y-2 pt-2">
-              <h3 className="text-md font-semibold text-slate-700">Liste des ingrédients (pour 1 personne) :</h3>
+              <h3 className="text-md font-semibold text-slate-700">Liste des ingrédients (pour {meal.baseServings} personne{meal.baseServings > 1 ? 's' : ''}) :</h3>
               <ul className="max-h-48 overflow-y-auto space-y-2 bg-slate-50 p-3 rounded-lg border">
                 {ingredients.map((ing, index) => (
                   <li key={index} className="flex items-center justify-between bg-white p-2 rounded-md shadow-sm">

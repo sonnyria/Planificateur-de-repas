@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Meal, Ingredient, Unit } from '../types';
-import { PlusIcon, TrashIcon } from './Icons';
+import { PlusIcon, TrashIcon, SparklesIcon } from './Icons';
+import { suggestIngredients } from '../services/geminiService';
 
 interface MealFormProps {
   onAddMeal: (meal: Omit<Meal, 'id'>) => void;
@@ -10,6 +11,33 @@ const MealForm: React.FC<MealFormProps> = ({ onAddMeal }) => {
   const [mealName, setMealName] = useState('');
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [currentIngredient, setCurrentIngredient] = useState({ name: '', quantity: '', unit: 'g' as Unit });
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [baseServings, setBaseServings] = useState(1);
+
+  useEffect(() => {
+    if (ingredients.length === 0) {
+      setBaseServings(1);
+    }
+  }, [ingredients]);
+
+  const handleSuggestIngredients = async () => {
+    if (!mealName.trim()) return;
+    setIsSuggesting(true);
+    try {
+      const suggested = await suggestIngredients(mealName);
+      if (suggested && suggested.length > 0) {
+        setIngredients(suggested);
+        setBaseServings(4);
+      } else {
+        alert("Désolé, impossible de suggérer des ingrédients pour ce plat. Veuillez les ajouter manuellement.");
+      }
+    } catch (error) {
+      console.error("Failed to suggest ingredients:", error);
+      alert("Une erreur est survenue lors de la suggestion d'ingrédients.");
+    } finally {
+      setIsSuggesting(false);
+    }
+  };
 
   const handleAddIngredient = () => {
     if (currentIngredient.name && currentIngredient.quantity && currentIngredient.unit) {
@@ -32,7 +60,7 @@ const MealForm: React.FC<MealFormProps> = ({ onAddMeal }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (mealName && ingredients.length > 0) {
-      onAddMeal({ name: mealName, ingredients, baseServings: 1 }); // Base recipe is now for 1 person
+      onAddMeal({ name: mealName, ingredients, baseServings });
       setMealName('');
       setIngredients([]);
       setCurrentIngredient({ name: '', quantity: '', unit: 'g' });
@@ -54,15 +82,34 @@ const MealForm: React.FC<MealFormProps> = ({ onAddMeal }) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="mealName" className="block text-sm font-medium text-slate-600 mb-1">Nom du plat</label>
-          <input
-            id="mealName"
-            type="text"
-            value={mealName}
-            onChange={(e) => setMealName(e.target.value)}
-            placeholder="Ex: Spaghetti Bolognaise"
-            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-white text-slate-900"
-            required
-          />
+          <div className="flex gap-2">
+            <input
+              id="mealName"
+              type="text"
+              value={mealName}
+              onChange={(e) => setMealName(e.target.value)}
+              placeholder="Ex: Spaghetti Bolognaise"
+              className="flex-grow w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition bg-white text-slate-900"
+              required
+            />
+            <button
+              type="button"
+              onClick={handleSuggestIngredients}
+              disabled={!mealName.trim() || isSuggesting}
+              className="flex-shrink-0 flex items-center justify-center gap-2 px-3 py-2 bg-indigo-500 text-white font-semibold rounded-lg shadow-sm hover:bg-indigo-600 disabled:bg-indigo-300 disabled:cursor-not-allowed transition-colors"
+              aria-label="Suggérer des ingrédients avec l'IA"
+            >
+              {isSuggesting ? (
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+              ) : (
+                  <SparklesIcon className="w-5 h-5" />
+              )}
+              <span className="hidden sm:inline">{isSuggesting ? 'Patientez...' : 'Suggérer'}</span>
+            </button>
+          </div>
         </div>
         
         <div>
@@ -95,7 +142,7 @@ const MealForm: React.FC<MealFormProps> = ({ onAddMeal }) => {
 
         {ingredients.length > 0 && (
           <div className="space-y-2 pt-2">
-            <h3 className="text-md font-semibold text-slate-700">Liste des ingrédients (pour 1 personne) :</h3>
+            <h3 className="text-md font-semibold text-slate-700">Liste des ingrédients (pour {baseServings} personne{baseServings > 1 ? 's' : ''}) :</h3>
             <ul className="max-h-40 overflow-y-auto space-y-2 bg-slate-50 p-3 rounded-lg">
               {ingredients.map((ing, index) => (
                 <li key={index} className="flex items-center justify-between bg-white p-2 rounded-md shadow-sm">
