@@ -3,11 +3,11 @@ import type { Ingredient, Unit } from "../types";
 
 const ALLOWED_UNITS: Unit[] = ['g', 'ml', 'unité'];
 
-// La clé API est maintenant gérée par l'environnement et n'est pas configurable par l'utilisateur.
-// Cela simplifie l'expérience utilisateur et s'aligne sur les meilleures pratiques.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export const suggestIngredients = async (mealName: string): Promise<Ingredient[]> => {
+  // Initialise le client AI uniquement lorsque la fonction est appelée.
+  // Cela empêche un échec d'initialisation de planter toute l'application au démarrage.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
   try {
     const prompt = `Liste les ingrédients essentiels pour préparer un plat de "${mealName}" pour 4 personnes. Inclus des quantités et des unités réalistes. Retourne la réponse sous la forme d'un tableau JSON d'objets. Chaque objet doit avoir les clés "name" (string), "quantity" (number), et "unit" (string). L'unité doit être l'une des suivantes : 'g' (pour le poids), 'ml' (pour le volume), ou 'unité' (pour les pièces). Par exemple, pour "Spaghetti Bolognaise", retourne [{"name": "viande hachée", "quantity": 500, "unit": "g"}, {"name": "spaghetti", "quantity": 400, "unit": "g"}, {"name": "oignon", "quantity": 1, "unit": "unité"}]. Ne retourne que le tableau JSON, sans texte supplémentaire ni démarqueurs de code.`;
 
