@@ -3,11 +3,20 @@ import type { Ingredient, Unit } from "../types";
 
 const ALLOWED_UNITS: Unit[] = ['g', 'ml', 'unité'];
 
-export const suggestIngredients = async (mealName: string): Promise<Ingredient[] | null> => {
+export const suggestIngredients = async (mealName: string, manualApiKey?: string): Promise<Ingredient[] | null> => {
   try {
-    // Initialise le client AI uniquement lorsque la fonction est appelée.
-    // Cela garantit que la clé API la plus récente (sélectionnée via le modal) est utilisée.
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = manualApiKey || process.env.API_KEY;
+
+    if (!apiKey) {
+      // This case should be handled by the UI, but as a fallback:
+      const errorMessage = manualApiKey === '' 
+        ? "La clé d'API (API Key) est manquante.\n\nVeuillez en ajouter une dans les paramètres (icône d'engrenage) ou utiliser le bouton 'Suggérer' pour ouvrir la boîte de dialogue de sélection."
+        : "Aucune clé d'API n'a été sélectionnée via la boîte de dialogue AI Studio.";
+      alert(errorMessage);
+      return null;
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
 
     const prompt = `Liste les ingrédients essentiels pour préparer un plat de "${mealName}" pour 4 personnes. Inclus des quantités et des unités réalistes. Retourne la réponse sous la forme d'un tableau JSON d'objets. Chaque objet doit avoir les clés "name" (string), "quantity" (number), et "unit" (string). L'unité doit être l'une des suivantes : 'g' (pour le poids), 'ml' (pour le volume), ou 'unité' (pour les pièces). Par exemple, pour "Spaghetti Bolognaise", retourne [{"name": "viande hachée", "quantity": 500, "unit": "g"}, {"name": "spaghetti", "quantity": 400, "unit": "g"}, {"name": "oignon", "quantity": 1, "unit": "unité"}]. Ne retourne que le tableau JSON, sans texte supplémentaire ni démarqueurs de code.`;
 
@@ -57,9 +66,13 @@ export const suggestIngredients = async (mealName: string): Promise<Ingredient[]
     
     if (error instanceof Error) {
         if (error.message.includes('API key not valid') || error.message.includes('provide an API key')) {
-            errorMessage = "La clé d'API (API Key) est manquante.\n\nVeuillez utiliser le bouton 'Suggérer' pour ouvrir la boîte de dialogue et sélectionner une clé API valide.";
+            errorMessage = manualApiKey
+                ? "La clé d'API que vous avez fournie manuellement semble invalide. Veuillez la vérifier dans les paramètres."
+                : "La clé d'API (API Key) est manquante ou invalide. Essayez d'en sélectionner une via le bouton 'Suggérer' ou d'en configurer une manuellement dans les paramètres.";
         } else if (error.message.includes('Requested entity was not found')) {
-            errorMessage = "La clé d'API sélectionnée semble invalide ou n'a pas les autorisations nécessaires.\n\nVeuillez réessayer en sélectionnant une autre clé API.";
+            errorMessage = manualApiKey
+                ? "La clé d'API fournie manuellement n'a pas pu être trouvée ou n'a pas les autorisations nécessaires."
+                : "La clé d'API sélectionnée semble invalide ou n'a pas les autorisations nécessaires.\n\nVeuillez réessayer en sélectionnant une autre clé API ou en configurant une manuellement.";
         } else if (error instanceof ReferenceError && error.message.includes('process is not defined')) {
             errorMessage = "L'environnement de l'application n'est pas correctement configuré pour accéder aux clés d'API.";
         } else {

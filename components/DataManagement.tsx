@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import type { Meal, AggregatedIngredient, SelectedMealsConfig } from '../types';
 import type { Tab } from '../App';
 
@@ -9,6 +9,8 @@ interface DataManagementProps {
   suppressedItemKeys: string[];
   tabs: Tab[];
   onImport: (data: any) => void;
+  manualApiKey: string;
+  onApiKeyChange: (key: string) => void;
 }
 
 const DataManagement: React.FC<DataManagementProps> = ({ 
@@ -17,9 +19,16 @@ const DataManagement: React.FC<DataManagementProps> = ({
     manualShoppingItems, 
     suppressedItemKeys, 
     tabs,
-    onImport
+    onImport,
+    manualApiKey,
+    onApiKeyChange
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [apiKeyInput, setApiKeyInput] = useState(manualApiKey);
+
+  useEffect(() => {
+    setApiKeyInput(manualApiKey);
+  }, [manualApiKey]);
 
   const handleExport = () => {
     const dataToExport = {
@@ -28,6 +37,7 @@ const DataManagement: React.FC<DataManagementProps> = ({
       manualShoppingItems,
       suppressedItemKeys,
       tabsOrder: tabs.map(t => t.id),
+      manualApiKey, // Include API key in export
     };
 
     const dataStr = JSON.stringify(dataToExport, null, 2);
@@ -60,7 +70,7 @@ const DataManagement: React.FC<DataManagementProps> = ({
           const importedData = JSON.parse(text);
           
           // Basic validation to check if it looks like our data
-          if (importedData.meals && importedData.tabsOrder) {
+          if (importedData.meals && (importedData.tabsOrder || importedData.manualApiKey !== undefined)) {
              if (window.confirm("Êtes-vous sûr de vouloir importer ces données ? Toutes les données actuelles seront remplacées.")) {
                 onImport(importedData);
                 alert("Données importées avec succès !");
@@ -82,8 +92,13 @@ const DataManagement: React.FC<DataManagementProps> = ({
     reader.readAsText(file);
   };
 
+  const handleSaveApiKey = () => {
+    onApiKeyChange(apiKeyInput);
+    alert("Clé d'API enregistrée !");
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
         <div>
             <h3 className="text-lg font-semibold text-slate-800 mb-2">Sauvegarde des données</h3>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -106,6 +121,35 @@ const DataManagement: React.FC<DataManagementProps> = ({
                 accept="application/json"
                 className="hidden"
                 />
+            </div>
+        </div>
+
+        <div className="pt-6 border-t border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-800 mb-2">Configuration de l'API Gemini (Avancé)</h3>
+            <p className="text-sm text-slate-500 mb-3">Si la suggestion d'ingrédients ne fonctionne pas, vous pouvez entrer votre propre clé API Gemini ici.</p>
+            <div className="space-y-2">
+                <div className="flex justify-between items-baseline">
+                    <label htmlFor="apiKeyInput" className="text-sm font-medium text-slate-600">Votre Clé d'API</label>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:underline">
+                      Où trouver ma clé ?
+                    </a>
+                </div>
+                <div className="flex gap-2">
+                    <input
+                        id="apiKeyInput"
+                        type="password"
+                        value={apiKeyInput}
+                        onChange={(e) => setApiKeyInput(e.target.value)}
+                        placeholder="Collez votre clé ici"
+                        className="flex-grow w-full px-3 py-1.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 bg-white text-slate-900"
+                    />
+                    <button onClick={handleSaveApiKey} className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-sm hover:bg-green-600 transition-colors">
+                        Enregistrer
+                    </button>
+                </div>
+                <p className="text-xs text-amber-700 bg-amber-50 p-2 rounded-md">
+                    ⚠️ Attention : Votre clé sera stockée dans votre navigateur. N'utilisez cette option que si vous comprenez les risques de sécurité.
+                </p>
             </div>
         </div>
     </div>

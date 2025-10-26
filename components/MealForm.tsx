@@ -6,9 +6,10 @@ import ApiKeyModal from './ApiKeyModal';
 
 interface MealFormProps {
   onAddMeal: (meal: Omit<Meal, 'id'>) => void;
+  manualApiKey: string;
 }
 
-const MealForm: React.FC<MealFormProps> = ({ onAddMeal }) => {
+const MealForm: React.FC<MealFormProps> = ({ onAddMeal, manualApiKey }) => {
   const [mealName, setMealName] = useState('');
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [currentIngredient, setCurrentIngredient] = useState({ name: '', quantity: '', unit: 'g' as Unit });
@@ -26,7 +27,7 @@ const MealForm: React.FC<MealFormProps> = ({ onAddMeal }) => {
     if (!mealName.trim()) return;
     setIsSuggesting(true);
     try {
-      const suggested = await suggestIngredients(mealName);
+      const suggested = await suggestIngredients(mealName, manualApiKey);
       if (suggested && suggested.length > 0) {
         setIngredients(suggested);
         setBaseServings(4);
@@ -44,6 +45,13 @@ const MealForm: React.FC<MealFormProps> = ({ onAddMeal }) => {
   const handleSuggestIngredients = async () => {
     if (!mealName.trim()) return;
     
+    // If a manual API key is set, use it directly.
+    if (manualApiKey) {
+        await performSuggestion();
+        return;
+    }
+    
+    // Otherwise, fall back to the AI Studio key selection flow.
     // @ts-ignore
     if (window.aistudio && typeof window.aistudio.hasSelectedApiKey === 'function') {
         // @ts-ignore

@@ -26,10 +26,12 @@ const ApiKeyModal: React.FC<ApiKeyModalProps> = ({ isOpen, onClose, onSelectKey 
         </h2>
         <p className="text-slate-500 my-4 text-sm">
           Pour utiliser la suggestion d'ingrédients basée sur l'IA, vous devez sélectionner une clé d'API Gemini depuis votre projet Google AI Studio.
-          L'utilisation de l'API peut être soumise à des frais.
+        </p>
+        <p className="text-slate-500 my-4 text-sm">
+          Si vous n'avez pas encore de clé, vous pouvez en <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">créer une gratuitement sur Google AI Studio</a>.
         </p>
         <p className="text-sm mb-5">
-            <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
+            L'utilisation de l'API peut être soumise à des frais. <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
                 En savoir plus sur la facturation.
             </a>
         </p>

@@ -12,6 +12,8 @@ interface DataManagementModalProps {
   suppressedItemKeys: string[];
   tabs: Tab[];
   onImport: (data: any) => void;
+  manualApiKey: string;
+  onApiKeyChange: (key: string) => void;
 }
 
 const DataManagementModal: React.FC<DataManagementModalProps> = ({ isOpen, onClose, ...props }) => {

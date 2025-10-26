@@ -15,8 +15,8 @@ export type Tab = {
 };
 
 const initialTabs: Tab[] = [
-  { id: 'selected', label: 'Sélection' },
   { id: 'recipes', label: 'Recettes' },
+  { id: 'selected', label: 'Sélection' },
   { id: 'shopping', label: 'Courses' },
 ];
 
@@ -59,6 +59,10 @@ const App: React.FC = () => {
         console.error("Could not parse suppressedItemKeys from localStorage", error);
         return [];
     }
+  });
+  
+  const [manualApiKey, setManualApiKey] = useState<string>(() => {
+    return localStorage.getItem('gemini_api_key') || '';
   });
 
   const [tabs, setTabs] = useState<Tab[]>(() => {
@@ -119,6 +123,10 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('tabsOrder', JSON.stringify(tabs.map(t => t.id)));
   }, [tabs]);
+  
+  useEffect(() => {
+    localStorage.setItem('gemini_api_key', manualApiKey);
+  }, [manualApiKey]);
 
   useEffect(() => {
     // If there are no more selected meals, reset the list of suppressed items
@@ -279,6 +287,7 @@ const App: React.FC = () => {
     setSelectedMealsConfig(data.selectedMealsConfig || {});
     setManualShoppingItems(data.manualShoppingItems || []);
     setSuppressedItemKeys(data.suppressedItemKeys || []);
+    setManualApiKey(data.manualApiKey || '');
     if(data.tabsOrder){
         const orderedIds = data.tabsOrder as TabId[];
         const orderedTabs = [...initialTabs].sort((a, b) => orderedIds.indexOf(a.id) - orderedIds.indexOf(b.id));
@@ -333,6 +342,8 @@ const App: React.FC = () => {
         suppressedItemKeys={suppressedItemKeys}
         tabs={tabs}
         onImport={handleImportData}
+        manualApiKey={manualApiKey}
+        onApiKeyChange={setManualApiKey}
       />
 
       <main className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -384,7 +395,7 @@ const App: React.FC = () => {
             )}
             {activeTab === 'recipes' && (
                 <div className="space-y-8">
-                    <MealForm onAddMeal={handleAddMeal} />
+                    <MealForm onAddMeal={handleAddMeal} manualApiKey={manualApiKey} />
                     <MealList
                         meals={meals}
                         selectedMealsConfig={selectedMealsConfig}
