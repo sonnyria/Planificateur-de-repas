@@ -3,10 +3,10 @@ import type { Ingredient, Unit } from "../types";
 
 const ALLOWED_UNITS: Unit[] = ['g', 'ml', 'unité'];
 
-export const suggestIngredients = async (mealName: string): Promise<Ingredient[]> => {
+export const suggestIngredients = async (mealName: string): Promise<Ingredient[] | null> => {
   try {
     // Initialise le client AI uniquement lorsque la fonction est appelée.
-    // Cela empêche un échec d'initialisation de planter toute l'application au démarrage.
+    // Cela garantit que la clé API la plus récente (sélectionnée via le modal) est utilisée.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     const prompt = `Liste les ingrédients essentiels pour préparer un plat de "${mealName}" pour 4 personnes. Inclus des quantités et des unités réalistes. Retourne la réponse sous la forme d'un tableau JSON d'objets. Chaque objet doit avoir les clés "name" (string), "quantity" (number), et "unit" (string). L'unité doit être l'une des suivantes : 'g' (pour le poids), 'ml' (pour le volume), ou 'unité' (pour les pièces). Par exemple, pour "Spaghetti Bolognaise", retourne [{"name": "viande hachée", "quantity": 500, "unit": "g"}, {"name": "spaghetti", "quantity": 400, "unit": "g"}, {"name": "oignon", "quantity": 1, "unit": "unité"}]. Ne retourne que le tableau JSON, sans texte supplémentaire ni démarqueurs de code.`;
@@ -56,13 +56,13 @@ export const suggestIngredients = async (mealName: string): Promise<Ingredient[]
     let errorMessage = "Une erreur est survenue lors de la suggestion d'ingrédients.";
     
     if (error instanceof Error) {
-        // More user-friendly messages for common configuration errors
         if (error.message.includes('API key not valid') || error.message.includes('provide an API key')) {
-            errorMessage = "La clé d'API (API Key) fournie n'est pas valide ou est manquante.\n\nAssurez-vous que la variable d'environnement API_KEY est correctement configurée dans votre environnement de déploiement (par exemple, dans les paramètres du site Netlify).";
+            errorMessage = "La clé d'API (API Key) est manquante.\n\nVeuillez utiliser le bouton 'Suggérer' pour ouvrir la boîte de dialogue et sélectionner une clé API valide.";
+        } else if (error.message.includes('Requested entity was not found')) {
+            errorMessage = "La clé d'API sélectionnée semble invalide ou n'a pas les autorisations nécessaires.\n\nVeuillez réessayer en sélectionnant une autre clé API.";
         } else if (error instanceof ReferenceError && error.message.includes('process is not defined')) {
-            errorMessage = "L'environnement de l'application n'est pas correctement configuré pour accéder aux clés d'API.\n\nCette erreur se produit généralement lorsque l'application est exécutée dans un navigateur sans étape de build pour gérer les variables d'environnement.";
+            errorMessage = "L'environnement de l'application n'est pas correctement configuré pour accéder aux clés d'API.";
         } else {
-            // Generic error for other cases
             errorMessage += `\n\nVeuillez réessayer plus tard. Détails techniques : ${error.message}`;
         }
     } else if (typeof error === 'string') {
@@ -72,6 +72,6 @@ export const suggestIngredients = async (mealName: string): Promise<Ingredient[]
     }
 
     alert(errorMessage);
-    return [];
+    return null; // Return null to indicate an error occurred
   }
 };
