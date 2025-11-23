@@ -32,11 +32,8 @@ jobs:
       - name: Build
         run: npm run build
 
-                    - name: Copy assets redirect file
-        run: |
-          mkdir -p dist/assets
-          cp public/assets/index.html dist/assets/index.html/index.html
-      
+- name: Copy assets redirect file
+        run: mkdir -p dist/assets && cp public/assets/index.html dist/assets/index.htmlhtml dist/assets/index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
